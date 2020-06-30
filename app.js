@@ -3,30 +3,63 @@ new Vue({
     data:{
         playerHealth: 100,
         monsterHealth:100,
-        gameIsrunning: false
+        gameIsrunning: false,
+        turns: []
     },
     methods:{
         startGame: function () {
             this.gameIsrunning = true;
             this.playerHealth = 100;
             this.monsterHealth = 100;
+            this.turns = [];
         },
         attack: function () {
-            this.monsterHealth -= this.calculateDamage(3,10);
+            var damage = this.calculateDamage(3,10);
+            this.monsterHealth -= damage;
+            this.turns.unshift({
+                isPlayer: true,
+                text:'你對怪獸造成 ' + damage +' 的傷害'
+            });
             if(this.checkWin()){
                 return;
             }
-            this.playerHealth -= this.calculateDamage(5,12);
-            this.checkWin();
+            this.monsterAttacks();
         },
         specialAttack: function () {
-
+            var damage = this.calculateDamage(10,20)
+            this.monsterHealth -= damage;
+            this.turns.unshift({
+                isPlayer: true,
+                text:'你對怪獸造成特別的 ' + damage +' 的傷害'
+            });
+            if(this.checkWin()){
+                return;
+            }
+            this.monsterAttacks();
         },
         heal: function () {
-
+            if(this.playerHealth <= 90){
+                this.playerHealth += 10
+            } else {
+                this.playerHealth = 100;
+            }
+            this.turns.unshift({
+                isPlayer: true,
+                text:'你已經恢復10點生命'
+            });
+            this.monsterAttacks();
         },
         giveUp: function () {
-
+            this.gameIsrunning = false;
+        },
+        monsterAttacks: function () {
+            var damage = this.calculateDamage(5,12)
+            this.playerHealth -= damage;
+            this.turns.unshift({
+                isPlayer: false,
+                text:'怪獸對你造成 ' + damage +' 的傷害'
+            });
+            this.checkWin();
         },
         calculateDamage: function (min, max) {
             return Math.max(Math.floor(Math.random() * max) + 1, min);
